@@ -1,0 +1,7 @@
+export const HOME = '/'
+export const LOGIN = '/login'
+export const SIGN_UP = '/signup'
+export const PROFILE = '/p/:username'
+export const PIC_CLASH = '/picclash'
+export const CREATE = '/create'
+export const NOT_FOUND = '/404'
