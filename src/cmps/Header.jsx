@@ -21,7 +21,7 @@ export default function Header() {
 						{user ? (
 							<>
 								<Link to={PROFILE} aria-label="Profile">
-									{!user?.photoUrl ? (
+									{!user?.postUrl ? (
 										<img
 											className="rounded-full h-8 w-8 flex"
 											src={`/img/avatars/default.jpg`}
@@ -30,7 +30,7 @@ export default function Header() {
 									) : (
 										<img
 											className="rounded-full h-8 w-8 flex"
-											src={user?.photoUrl}
+											src={user?.postUrl}
 											alt={`${user?.displayName} profile`}
 										/>
 									)}

@@ -14,8 +14,8 @@ const PicClash = lazy(() => import('./views/PicClash'))
 const Create = lazy(() => import('./views/Create'))
 const NotFound = lazy(() => import('./views/NotFound'))
 
-function App() {
-  	const dispatch = useDispatch()
+export default function App() {
+	const dispatch = useDispatch()
 
 	useEffect(() => {
 		const user = utilService.loadFromStorage('user')
@@ -24,28 +24,19 @@ function App() {
 	}, [])
 
 	return (
-			<Suspense fallback={<p>Loading...</p>}>
-				<BrowserRouter>
-					<Routes>
-						<Route path={HOME} element={<Home />} />
-						<Route path={LOGIN} element={<Login />} />
-						<Route path={SIGN_UP} element={<Signup />} />
-						<Route path={PROFILE} element={<Profile />} />
-						<Route path={PIC_CLASH} element={<PicClash />} />
-						<Route path={CREATE} element={<Create />} />
-						<Route path={NOT_FOUND} element={<NotFound />} />
-						<Route path="*" element={<Navigate to="/404" replace />} />
-					</Routes>
-				</BrowserRouter>
-			</Suspense>
+		<Suspense fallback={<p>Loading...</p>}>
+			<BrowserRouter>
+				<Routes>
+					<Route path={HOME} element={<Home />} />
+					<Route path={LOGIN} element={<Login />} />
+					<Route path={SIGN_UP} element={<Signup />} />
+					<Route path={PROFILE} element={<Profile />} />
+					<Route path={PIC_CLASH} element={<PicClash />} />
+					<Route path={CREATE} element={<Create />} />
+					<Route path={NOT_FOUND} element={<NotFound />} />
+					<Route path="*" element={<Navigate to="/404" replace />} />
+				</Routes>
+			</BrowserRouter>
+		</Suspense>
 	)
 }
-{
-	/* <Router>
-        <Routes>
-          <Route path="/login" component={Login} />
-        </Routes>
-    </Router> */
-}
-
-export default App

@@ -4,10 +4,10 @@ import { toggleLiked } from '../../services/user.service'
 import { useSelector } from 'react-redux'
 import SvgIcon from '../util/SvgIcon'
 
-export default function PostActions({ docId, totalLikes, likedPhoto, handleFocus }) {
+export default function PostActions({ docId, totalLikes, likedPost, handleFocus }) {
 	const { userId = '' } = useSelector((storeState) => storeState.userModule.loggedInUser)
 
-	const [likeToggle, setLikeToggle] = useState(likedPhoto)
+	const [likeToggle, setLikeToggle] = useState(likedPost)
 	const [likes, setLikes] = useState(totalLikes)
 
 	const handleToggleLiked = () => {
@@ -60,6 +60,6 @@ export default function PostActions({ docId, totalLikes, likedPhoto, handleFocus
 PostActions.propTypes = {
 	docId: PropTypes.string.isRequired,
 	totalLikes: PropTypes.number.isRequired,
-	likedPhoto: PropTypes.bool.isRequired,
+	likedPost: PropTypes.bool.isRequired,
 	handleFocus: PropTypes.func.isRequired,
 }

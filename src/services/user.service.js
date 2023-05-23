@@ -7,6 +7,7 @@ import {
 import {
 	getFirestore,
 	doc,
+	addDoc,
 	setDoc,
 	collection,
 	getDocs,
@@ -34,27 +35,28 @@ export async function signup(email, password, username, fullname) {
 			username: user.username,
 			fullname: user.fullname,
 		})
-		addNewUserToCollection(user.uid, username, fullname, email)
-		return user
+		return await addNewUserToCollection(user.uid, username, fullname, email)
 	} catch (err) {
 		console.log(`Error in signup:`, err)
 		throw err
 	}
 }
 
-function addNewUserToCollection(userId, username, fullname, email) {
+async function addNewUserToCollection(userId, username, fullname, email) {
 	try {
 		const entityCol = doc(db, USER_COLLECTION_KEY, userId)
-		setDoc(entityCol, {
+		const userObj = {
 			userId,
-			username: username.toLowerCase(),
+			username,
 			fullname,
 			email: email.toLowerCase(),
 			following: [],
 			followers: [],
 			createdAt: Date.now(),
-			photoUrl: '',
-		})
+			postUrl: '',
+		}
+		await setDoc(entityCol, userObj)
+		return userObj
 	} catch (err) {
 		console.error(`Error in adding new user to collection:`, err)
 		throw err
@@ -70,7 +72,7 @@ export async function login(email, password) {
 			// const loggedInUser = {
 			// 	displayName: user.displayName,
 			// 	email: user.email,
-			// 	photoURL: user.photoURL,
+			// 	postURL: user.postURL,
 			// 	emailVerified: user.emailVerified,
 			// 	userId: user.uid,
 			// 	following: user.following,
@@ -109,6 +111,18 @@ export async function doesUserNameExists(username) {
 	}
 }
 
+export async function doesThisEmailExist(email) {
+	try {
+		const result = await getDocs(
+			query(collection(db, USER_COLLECTION_KEY), where('email', '==', email), limit(1))
+		)
+		return !result.empty
+	} catch (err) {
+		console.log(`Error in checking if email exists:`, err)
+		throw err
+	}
+}
+
 
 export async function getUserById(userId) {
 	try {
@@ -122,6 +136,22 @@ export async function getUserById(userId) {
 		return user
 	} catch (err) {
 		console.log(`Error in getting user by id:`, err)
+		throw err
+	}
+}
+
+export async function getUserByUsername(username) {
+	try {
+		const result = await getDocs(
+			query(collection(db, USER_COLLECTION_KEY), where('username', '==', username))
+		)
+		const user = result.docs.map((item) => ({
+			...item.data(),
+			docId: item.id,
+		}))[0]
+		return user
+	} catch (err) {
+		console.log(`Error in getting user by username:`, err)
 		throw err
 	}
 }
@@ -163,7 +193,6 @@ export async function getSuggestedProfilesById(userId, following) {
 
 export async function toggleFollower(followingUserId, followerUserId, newIsFollowing) {
 		await updateUserFollowing(followerUserId, followingUserId, newIsFollowing)
-		// update the followers array of the user who has been followed
 		await updateUserFollowers(followingUserId, followerUserId, newIsFollowing)
 }
 
@@ -201,7 +230,7 @@ export async function updateUserFollowers(
 	}
 }
 
-export async function getPhotosByUserId(userId) {
+export async function getPostsByUserId(userId) {
 	try {
 		const result = await getDocs(
 			query(collection(db, POST_COLLECTION_KEY), where('userId', '==', userId))
@@ -217,7 +246,7 @@ export async function getPhotosByUserId(userId) {
 	}
 }
 
-export async function getPhotos(userId, following) {
+export async function getPosts(userId, following) {
 	try {
 		const result = await getDocs(
 			query(
@@ -231,14 +260,14 @@ export async function getPhotos(userId, following) {
 			docId: item.id,
 		}))
 		const postsWithUserDetails = await Promise.all(
-			posts.map(async (photo) => {
-				let userLikedPhoto = false
-				if (photo.likes.includes(userId)) {
-					userLikedPhoto = true
+			posts.map(async (post) => {
+				let userLikedPost = false
+				if (post.likes.includes(userId)) {
+					userLikedPost = true
 				}
-				const user = await getUserById(photo.userId)
-				const { username, photoUrl } = user
-				return { username, userPhotoUrl: photoUrl, ...photo, userLikedPhoto }
+				const user = await getUserById(post.userId)
+				const { username, postUrl } = user
+				return { username, userPostUrl: postUrl, ...post, userLikedPost }
 			})
 		)
 		return postsWithUserDetails
@@ -249,27 +278,27 @@ export async function getPhotos(userId, following) {
 }
 
 //TODO move to this function
-// export async function getPhotos(userId, following, lastPhotoDoc = null, pageSize = 10) {
+// export async function getPosts(userId, following, lastPostDoc = null, pageSize = 10) {
 // 	try {
-// 		let photoQuery = query(
-// 			collection(db, PHOTO_COLLECTION_KEY),
+// 		let postQuery = query(
+// 			collection(db, POST_COLLECTION_KEY),
 // 			where('userId', 'in', [...following, userId]),
 // 			orderBy('createdAt', 'desc'),
 // 			limit(pageSize)
 // 		)
 
-// 		if (lastPhotoDoc) {
-// 			photoQuery = startAfter(photoQuery, lastPhotoDoc)
+// 		if (lastPostDoc) {
+// 			postQuery = startAfter(postQuery, lastPostDoc)
 // 		}
 
-// 		const result = await getDocs(photoQuery)
+// 		const result = await getDocs(postQuery)
 // 		const posts = result.docs.map((item) => ({
 // 			...item.data(),
 // 			docId: item.id,
 // 		}))
 
 // 		// Get unique userIds from posts
-// 		const userIds = [...new Set(posts.map((photo) => photo.userId))]
+// 		const userIds = [...new Set(posts.map((post) => post.userId))]
 
 // 		// Fetch all users in one go
 // 		const users = await Promise.all(userIds.map((id) => getUserById(id)))
@@ -281,19 +310,19 @@ export async function getPhotos(userId, following) {
 // 		}, {})
 
 // 		// Map user data to posts
-// 		const postsWithUserDetails = posts.map((photo) => {
-// 			let userLikedPhoto = false
-// 			if (photo.likes.includes(userId)) {
-// 				userLikedPhoto = true
+// 		const postsWithUserDetails = posts.map((post) => {
+// 			let userLikedPost = false
+// 			if (post.likes.includes(userId)) {
+// 				userLikedPost = true
 // 			}
-// 			const user = userMap[photo.userId]
+// 			const user = userMap[post.userId]
 // 			const { username } = user
-// 			return { username, ...photo, userLikedPhoto }
+// 			return { username, ...post, userLikedPost }
 // 		})
 
 // 		return {
 // 			posts: postsWithUserDetails,
-// 			lastPhotoDoc: result.docs[result.docs.length - 1],
+// 			lastPostDoc: result.docs[result.docs.length - 1],
 // 		}
 // 	} catch (err) {
 // 		console.log(`Error in getting posts:`, err)
@@ -304,8 +333,8 @@ export async function getPhotos(userId, following) {
 
 export async function toggleLiked(docId, userId, liked) {
 	try {
-		const photoDoc = doc(db, POST_COLLECTION_KEY, docId)
-		await updateDoc(photoDoc, {
+		const postDoc = doc(db, POST_COLLECTION_KEY, docId)
+		await updateDoc(postDoc, {
 			likes: liked ? arrayUnion(userId) : arrayRemove(userId),
 		})
 	} catch (err) {
@@ -316,12 +345,30 @@ export async function toggleLiked(docId, userId, liked) {
 
 export async function addComment(commentObj, docId) {
 	try {
-		const photoDoc = doc(db, POST_COLLECTION_KEY, docId)
-		await updateDoc(photoDoc, {
+		const postDoc = doc(db, POST_COLLECTION_KEY, docId)
+		await updateDoc(postDoc, {
 			comments: arrayUnion(commentObj),
 		})
 	} catch (err) {
 		console.log(`Error in adding comment:`, err)
+		throw err
+	}
+}
+
+export async function createPost(user, caption, imgSrc) {
+	try {
+		const postDoc = await addDoc(collection(db, POST_COLLECTION_KEY), {
+			caption,
+			imgSrc,
+			userId: user.userId,
+			username: user.username,
+			createdAt: Date.now(),
+			likes: [],
+			comments: [],
+		})
+		return postDoc.id
+	} catch (err) {
+		console.log(`Error in creating post:`, err)
 		throw err
 	}
 }

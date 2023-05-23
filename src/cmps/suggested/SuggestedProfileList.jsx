@@ -32,7 +32,7 @@ export default function Suggestions({ userId, following }) {
 								key={profile.userId}
 								profileId={profile.userId}
                 profileUsername={profile.username}
-								profilePhotoUrl={profile.photoUrl}
+								profilePostUrl={profile.postUrl}
                 userId={userId}
 							/>
 						)

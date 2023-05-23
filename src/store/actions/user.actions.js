@@ -50,6 +50,7 @@ export function doSignup(email, password, username, fullname) {
             return loggedInUser
 		} catch (err) {
 			console.error('error:', err)
+			throw err
 		}
 	}
 }

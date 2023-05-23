@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LOGIN, HOME } from '../routes'
-import { doesUserNameExists } from '../services/user.service'
+import { doesUserNameExists, doesThisEmailExist } from '../services/user.service'
 import { doSignup } from '../store/actions/user.actions'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
@@ -17,7 +17,7 @@ export default function Signup() {
 
 	const [error, setError] = useState('')
 	const areFieldsEmpty = password === '' || emailAddress === '' || username === '' || fullname === ''
-	function isValid() {
+	async function isValid() {
 		if (areFieldsEmpty) {
 			setError('Please fill out all fields.')
 			return false
@@ -43,11 +43,21 @@ export default function Signup() {
 			return false
 		}
 		try {
-			// const userNameExists = await doesUserNameExists(username)
-			// if (userNameExists) {
-			// 	setError('That username is already taken, please try another.')
-			// 	return false
-			// }
+			const userNameExists = await doesUserNameExists(username)
+			if (userNameExists) {
+				setError('That username is already taken, please try another.')
+				return false
+			}
+		} catch (err) {
+			setError('Error in signup request. Please try again.')
+			return false
+		}
+		try {
+			const emailAddressExists = await doesThisEmailExist(emailAddress)
+			if (emailAddressExists) {
+				setError('That email address is already taken, please try another.')
+				return false
+			}
 		} catch (err) {
 			setError('Error in signup request. Please try again.')
 			return false
@@ -56,7 +66,8 @@ export default function Signup() {
 	}
 	const handleSignup = async (ev) => {
 		ev.preventDefault()
-		if (!isValid()) return
+		const valid = await isValid()
+		if (!valid) return
 		try {
 			await dispatch(doSignup(emailAddress, password, username, fullname))
 			navigate(HOME)
