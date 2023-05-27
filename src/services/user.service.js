@@ -191,9 +191,9 @@ export async function getSuggestedProfilesById(userId, following) {
 	}
 }
 
-export async function toggleFollower(followingUserId, followerUserId, newIsFollowing) {
-		await updateUserFollowing(followerUserId, followingUserId, newIsFollowing)
-		await updateUserFollowers(followingUserId, followerUserId, newIsFollowing)
+export async function toggleFollower(followedUserId, userId, newIsFollowing) {
+	await updateUserFollowing(userId, followedUserId, newIsFollowing)
+	await updateUserFollowers(followedUserId, userId, newIsFollowing)
 }
 
 export async function updateUserFollowing(

@@ -18,8 +18,10 @@ export default function Sidebar() {
 		{ to: `/p/${username}`, text: 'Profile', svg: null, profile: true },
 	]
 	return (
-		<div className=" mr-10 pt-0.5 pb-0.5 pl-1 pr-1 h-screen flex flex-col gap-8 items-start select-none border-r border-gray-300 bg-white w-[244px]">
-			<img className="m-3 m-w-full" src={`${process.env.PUBLIC_URL}/img/logo.png`} />
+		<div className="mr-10 pt-0.5 pb-0.5 pl-1 pr-1 h-screen flex flex-col gap-8 items-start select-none border-r border-gray-300 bg-white w-[244px]">
+			<Link to={HOME}>
+				<img className="m-3 m-w-full" src={`${process.env.PUBLIC_URL}/img/logo.png`} />
+			</Link>
 			{links.map(({ to, text, svg, profile }) => (
 				<Link
 					key={to}

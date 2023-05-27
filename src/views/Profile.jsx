@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
 import { getPostsByUserId, getUserByUsername } from '../services/user.service'
 import MainWrapper from '../cmps/MainWrapper'
-import {useSelector} from 'react-redux'
+import { useSelector } from 'react-redux'
 import { toggleFollower } from '../services/user.service'
 
 export default function Profile() {
@@ -14,7 +14,6 @@ export default function Profile() {
 	const [isFollowing, setIsFollowing] = useState(false)
 	const handleFollowToggle = async () => {
 		setIsFollowing(!isFollowing)
-		//set is async so using opposite
 		toggleFollower(user.userId, loggedInUser.userId, !isFollowing)
 	}
 	useEffect(() => {
@@ -36,10 +35,10 @@ export default function Profile() {
 			setPosts(posts || [])
 		}
 		getPosts()
-	}, [user, loggedInUser])//TODO: move to postlist, add grid
+	}, [user, loggedInUser])
 	return (
 		<MainWrapper>
-			<div className="">
+			<div className="flex items-center space-x-4">
 				<img
 					src={user?.avatarUrl || `${process.env.PUBLIC_URL}/img/avatars/default.png`}
 					alt={`${user?.username} avatar`}
@@ -48,19 +47,29 @@ export default function Profile() {
 				<div className="">
 					<h1 className="text-2xl font-bold">{user?.username}</h1>
 					<h2 className="text-lg">{user?.fullname}</h2>
+					{loggedInUser && user?.userId !== loggedInUser.userId && (
+						<button
+							onClick={handleFollowToggle}
+							className="bg-blue-medium text-white py-2 px-4 rounded-lg">
+							{isFollowing ? 'Unfollow' : 'Follow'}
+						</button>
+					)}
 				</div>
-				{loggedInUser && user?.userId !== loggedInUser.userId && (
-					<button onClick={handleFollowToggle}>{isFollowing ? 'Unfollow' : 'Follow'}</button>
-				)}
 			</div>
 			<div>
 				<h2 className="text-2xl font-bold">Posts</h2>
 				{user && posts?.length === 0 && <p>{user?.username} has no posts yet.</p>}
-				{posts.length > 0 &&
-					posts?.map((post, idx) => (
-						<img key={idx} src={post.imgSrc} alt={post.caption} className="w-[293px] h-[293px] object-cover" />
-					))}
-				{/* <PostList posts={user?.posts} /> */}
+				<div className="grid grid-cols-3 gap-4">
+					{posts.length > 0 &&
+						posts?.map((post, idx) => (
+							<img
+								key={idx}
+								src={post.imgSrc}
+								alt={post.caption}
+								className="w-full h-auto object-cover"
+							/>
+						))}
+				</div>
 			</div>
 		</MainWrapper>
 	)
