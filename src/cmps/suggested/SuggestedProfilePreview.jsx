@@ -1,14 +1,14 @@
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
-import { toggleFollower } from '../../services/user.service'
+import {  setFollowers } from '../../services/user.service'
 const DEFAULT_PROFILE_PIC = './img/avatars/default.png'
 export default function SuggestedProfile({ profileId, profileUsername, profilePostUrl, userId }) {
 	const [followed, setFollowed] = useState(false)
 	async function handleFollowUser() {
 		setFollowed((prevFollowed) => !prevFollowed)
           //setting is async so using negative in the toggle
-          await toggleFollower(profileId, userId, !followed)
+          await setFollowers(profileId, userId, !followed)
 	}
 	return (
 		<div className="flex flex-row items-center align-items justify-between">

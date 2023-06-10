@@ -1,11 +1,5 @@
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import {
-	getAuth,
-	createUserWithEmailAndPassword,
-	signInWithEmailAndPassword,
-	updateProfile,
-} from 'firebase/auth'
-import {
-	getFirestore,
 	doc,
 	addDoc,
 	setDoc,
@@ -17,25 +11,40 @@ import {
 	updateDoc,
 	orderBy,
 	arrayUnion,
-	arrayRemove
+	arrayRemove,
 } from 'firebase/firestore'
 
-const auth = getAuth()
-const db = getFirestore()
+import { db, auth } from '../lib/firebase'
+
+export const userService = {
+	signup,
+	login,
+	updateCurrentUser,
+	getUserById,
+	getUserByUsername,
+	getSuggestedProfilesById,
+	setFollowers,
+	updateUserFollowing,
+	updateUserFollowers,
+}
 
 const USER_COLLECTION_KEY = 'user'
-const POST_COLLECTION_KEY = 'post'
 const SUGGESTED_PROFILES_NUM = 6
 
 export async function signup(email, password, username, fullname) {
 	try {
+		if (!email || !password || !username || !fullname) {
+			throw new Error('Missing required user input')
+		}
 		const userCredentials = await createUserWithEmailAndPassword(auth, email, password)
 		const user = userCredentials.user
 		await updateProfile(auth.currentUser, {
 			username: user.username,
 			fullname: user.fullname,
 		})
-		return await addNewUserToCollection(user.uid, username, fullname, email)
+		const userObj = await addNewUserToCollection(user.uid, username, fullname, email)
+		await updateUserFollowers('aKKGgYXK0NXjHcKgAgWmRkUKQ9M2', userObj.userId, true)
+		return userObj
 	} catch (err) {
 		console.log(`Error in signup:`, err)
 		throw err
@@ -50,7 +59,7 @@ async function addNewUserToCollection(userId, username, fullname, email) {
 			username,
 			fullname,
 			email: email.toLowerCase(),
-			following: [],
+			following: ['aKKGgYXK0NXjHcKgAgWmRkUKQ9M2'],
 			followers: [],
 			createdAt: Date.now(),
 			postUrl: '',
@@ -123,7 +132,6 @@ export async function doesThisEmailExist(email) {
 	}
 }
 
-
 export async function getUserById(userId) {
 	try {
 		const result = await getDocs(
@@ -191,16 +199,12 @@ export async function getSuggestedProfilesById(userId, following) {
 	}
 }
 
-export async function toggleFollower(followedUserId, userId, newIsFollowing) {
+export async function setFollowers(followedUserId, userId, newIsFollowing) {
 	await updateUserFollowing(userId, followedUserId, newIsFollowing)
 	await updateUserFollowers(followedUserId, userId, newIsFollowing)
 }
 
-export async function updateUserFollowing(
-	userId,
-	followingUserId,
-	isFollowingProfile
-) {
+export async function updateUserFollowing(userId, followingUserId, isFollowingProfile) {
 	try {
 		const loggedInUserDoc = doc(db, USER_COLLECTION_KEY, userId)
 		await updateDoc(loggedInUserDoc, {
@@ -212,163 +216,14 @@ export async function updateUserFollowing(
 	}
 }
 
-export async function updateUserFollowers(
-	userId,
-	followerId,
-	isFollowingProfile
-) {
+export async function updateUserFollowers(userId, followerId, isFollowingProfile) {
 	try {
 		const followedUserDoc = doc(db, USER_COLLECTION_KEY, userId)
 		await updateDoc(followedUserDoc, {
-			followers: isFollowingProfile
-				? arrayUnion(followerId)
-				: arrayRemove(followerId),
+			followers: isFollowingProfile ? arrayUnion(followerId) : arrayRemove(followerId),
 		})
 	} catch (err) {
 		console.log(`Error in updating followed user followers:`, err)
-		throw err
-	}
-}
-
-export async function getPostsByUserId(userId) {
-	try {
-		const result = await getDocs(
-			query(collection(db, POST_COLLECTION_KEY), where('userId', '==', userId))
-		)
-		const posts = result.docs.map((item) => ({
-			...item.data(),
-			docId: item.id,
-		}))
-		return posts
-	} catch (err) {
-		console.log(`Error in getting posts by user id:`, err)
-		throw err
-	}
-}
-
-export async function getPosts(userId, following) {
-	try {
-		const result = await getDocs(
-			query(
-				collection(db, POST_COLLECTION_KEY),
-				where('userId', 'in', [...following, userId]),
-				orderBy('createdAt', 'desc')
-			)
-		)
-		const posts = result.docs.map((item) => ({
-			...item.data(),
-			docId: item.id,
-		}))
-		const postsWithUserDetails = await Promise.all(
-			posts.map(async (post) => {
-				let userLikedPost = false
-				if (post.likes.includes(userId)) {
-					userLikedPost = true
-				}
-				const user = await getUserById(post.userId)
-				const { username, postUrl } = user
-				return { username, userPostUrl: postUrl, ...post, userLikedPost }
-			})
-		)
-		return postsWithUserDetails
-	} catch (err) {
-		console.log(`Error in getting posts:`, err)
-		throw err
-	}
-}
-
-//TODO move to this function
-// export async function getPosts(userId, following, lastPostDoc = null, pageSize = 10) {
-// 	try {
-// 		let postQuery = query(
-// 			collection(db, POST_COLLECTION_KEY),
-// 			where('userId', 'in', [...following, userId]),
-// 			orderBy('createdAt', 'desc'),
-// 			limit(pageSize)
-// 		)
-
-// 		if (lastPostDoc) {
-// 			postQuery = startAfter(postQuery, lastPostDoc)
-// 		}
-
-// 		const result = await getDocs(postQuery)
-// 		const posts = result.docs.map((item) => ({
-// 			...item.data(),
-// 			docId: item.id,
-// 		}))
-
-// 		// Get unique userIds from posts
-// 		const userIds = [...new Set(posts.map((post) => post.userId))]
-
-// 		// Fetch all users in one go
-// 		const users = await Promise.all(userIds.map((id) => getUserById(id)))
-
-// 		// Create a map for quick lookup
-// 		const userMap = users.reduce((map, user) => {
-// 			map[user.userId] = user
-// 			return map
-// 		}, {})
-
-// 		// Map user data to posts
-// 		const postsWithUserDetails = posts.map((post) => {
-// 			let userLikedPost = false
-// 			if (post.likes.includes(userId)) {
-// 				userLikedPost = true
-// 			}
-// 			const user = userMap[post.userId]
-// 			const { username } = user
-// 			return { username, ...post, userLikedPost }
-// 		})
-
-// 		return {
-// 			posts: postsWithUserDetails,
-// 			lastPostDoc: result.docs[result.docs.length - 1],
-// 		}
-// 	} catch (err) {
-// 		console.log(`Error in getting posts:`, err)
-// 		throw err
-// 	}
-// }
-
-
-export async function toggleLiked(docId, userId, liked) {
-	try {
-		const postDoc = doc(db, POST_COLLECTION_KEY, docId)
-		await updateDoc(postDoc, {
-			likes: liked ? arrayUnion(userId) : arrayRemove(userId),
-		})
-	} catch (err) {
-		console.log(`Error in toggling liked:`, err)
-		throw err
-	}
-}
-
-export async function addComment(commentObj, docId) {
-	try {
-		const postDoc = doc(db, POST_COLLECTION_KEY, docId)
-		await updateDoc(postDoc, {
-			comments: arrayUnion(commentObj),
-		})
-	} catch (err) {
-		console.log(`Error in adding comment:`, err)
-		throw err
-	}
-}
-
-export async function createPost(user, caption, imgSrc) {
-	try {
-		const postDoc = await addDoc(collection(db, POST_COLLECTION_KEY), {
-			caption,
-			imgSrc,
-			userId: user.userId,
-			username: user.username,
-			createdAt: Date.now(),
-			likes: [],
-			comments: [],
-		})
-		return postDoc.id
-	} catch (err) {
-		console.log(`Error in creating post:`, err)
 		throw err
 	}
 }

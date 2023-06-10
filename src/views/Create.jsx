@@ -1,7 +1,7 @@
 import MainWrapper from '../cmps/MainWrapper'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
-import { createPost } from '../services/user.service'
+import { postService } from '../services/post.service'
 import { useNavigate } from 'react-router'
 import { HOME } from '../routes'
 
@@ -13,7 +13,7 @@ export default function Create() {
 	const handleSubmit = async (ev) => {
 		ev.preventDefault()
 		if (!loggedInUser) return
-		await createPost(loggedInUser, caption, imgUrl)
+		await postService.createPost(loggedInUser, caption, imgUrl)
 		navigate(HOME)
 	}
 	return (

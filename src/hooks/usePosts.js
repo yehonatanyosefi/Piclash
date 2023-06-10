@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
-import { getUserById, getPosts } from "../services/user.service"
+import { getUserById,  } from "../services/user.service"
+import { postService } from "../services/post.service"
 
 export default function usePosts() {
      const [posts, setPosts] = useState(null)
@@ -12,7 +13,7 @@ export default function usePosts() {
                const { following, userId } = loggedInUser
                let followedUserPosts = []
                if (following.length > 0) {
-                    followedUserPosts = await getPosts(userId, following)
+                    followedUserPosts = await postService.getPosts(userId, following)
                }
                setPosts(followedUserPosts)
           }

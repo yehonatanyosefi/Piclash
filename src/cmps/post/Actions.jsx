@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react'
 import PropTypes from 'prop-types'
-import { toggleLiked } from '../../services/user.service'
+import { postService } from '../../services/post.service'
 import { useSelector } from 'react-redux'
 import SvgIcon from '../util/SvgIcon'
 
@@ -14,7 +14,7 @@ export default function PostActions({ docId, totalLikes, likedPost, handleFocus 
 		setLikeToggle((prevLikeToggle) => !prevLikeToggle)
 		//since we are using the previous state, we use the opposite in the next set and toggleLiked
 		setLikes((prevLikes) => (likeToggle ? prevLikes - 1 : prevLikes + 1))
-		toggleLiked(docId, userId, !likeToggle)
+		postService.toggleLiked(docId, userId, !likeToggle)
 	}
 
 	useEffect(() => {

@@ -5,7 +5,7 @@ import Actions from './Actions'
 import CommentList from './CommentList'
 import AddComment from './AddComment'
 import { formatDistance } from 'date-fns'
-import { addComment } from '../../services/user.service'
+import { postService } from '../../services/post.service'
 import { useSelector } from 'react-redux'
 
 const COMMENTS_TO_SHOW = 3
@@ -27,7 +27,7 @@ export default function Post({ content }) { //TODO: add post details
 			createdAt: Date.now(),
 		}
 		setCommentsSlice([...commentsSlice, commentObj])
-		addComment(commentObj, docId, userId)
+		postService.addComment(commentObj, docId, userId)
 	}
 	return (
 		<div className="mb-5 border bg-white border-gray-primary">

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router'
-import { getPostsByUserId, getUserByUsername } from '../services/user.service'
+import { setFollowers, getUserByUsername } from '../services/user.service'
+import { postService } from '../services/post.service'
 import MainWrapper from '../cmps/MainWrapper'
 import { useSelector } from 'react-redux'
-import { toggleFollower } from '../services/user.service'
 
 export default function Profile() {
 	const navigate = useNavigate()
@@ -14,7 +14,7 @@ export default function Profile() {
 	const [isFollowing, setIsFollowing] = useState(false)
 	const handleFollowToggle = async () => {
 		setIsFollowing(!isFollowing)
-		toggleFollower(user.userId, loggedInUser.userId, !isFollowing)
+		setFollowers(user.userId, loggedInUser.userId, !isFollowing)
 	}
 	useEffect(() => {
 		document.title = `${username} - Piclash`
@@ -31,7 +31,7 @@ export default function Profile() {
 		if (!user || !loggedInUser) return
 		setIsFollowing(user.followers.includes(loggedInUser.userId))
 		async function getPosts() {
-			const posts = await getPostsByUserId(user.userId)
+			const posts = await postService.getPostsByUserId(user.userId)
 			setPosts(posts || [])
 		}
 		getPosts()

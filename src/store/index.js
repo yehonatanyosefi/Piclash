@@ -1,12 +1,12 @@
 import thunk from 'redux-thunk'
 import { applyMiddleware, combineReducers, compose, legacy_createStore as createStore } from 'redux'
 import { userReducer } from './reducers/user.reducer'
-import { contactReducer } from './reducers/contact.reducer'
+import { roomReducer } from './reducers/room.reducer'
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
 const rootReducer = combineReducers({
-    contactModule: contactReducer,
+    roomModule: roomReducer,
     userModule: userReducer
 })
 

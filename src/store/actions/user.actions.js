@@ -54,18 +54,3 @@ export function doSignup(email, password, username, fullname) {
 		}
 	}
 }
-
-// export function spendCoins(contact, amount) {
-//     return async (dispatch, getState) => {
-//         try {
-//             const loggedInUser = await addMove(contact, amount)
-//             const action = {
-//                 type: SET_USER,
-//                 loggedInUser
-//             }
-//             dispatch(action)
-//         } catch (error) {
-//             console.error('error:', error)
-//         }
-//     }
-// }
