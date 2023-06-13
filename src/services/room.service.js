@@ -1,9 +1,10 @@
 import { realtimeDb } from '../lib/firebase'
-import { ref, onValue, set } from 'firebase/database'
+import { ref, onValue, set, get } from 'firebase/database'
 import { setRoom } from '../store/actions/room.actions'
 import { utilService } from './util.service'
 
-const ROOM_COLLECTION_KEY = 'room'
+export const GUEST_ID = 'aKKGgYXK0NXjHcKgAgWmRkUKQ9M2'
+export const ROOM_COLLECTION_KEY = 'room'
 
 export const roomService = {
 	createRoom,
@@ -11,31 +12,77 @@ export const roomService = {
 	startGame,
 }
 
-async function createRoom(roomId, dispatch) {
+async function createRoom(roomId, dispatch, userId) {
 	const roomRef = ref(realtimeDb, `${ROOM_COLLECTION_KEY}/${roomId}`)
 
-	const unsubscribe = onValue(roomRef, async (snapshot) => {
-		let roomVal
-		if (!snapshot.exists()) {
-			roomVal = {
-				id: roomId,
-				category: utilService.getRndCategory(),
-				categories: [],
-				players: [],
-				votes: {},
-				posts: [],
-			}
-			set(roomRef, roomVal).then(() => {
-				dispatch(setRoom(roomVal))
-			})
-		} else {
-			roomVal = snapshot.val()
-			dispatch(setRoom(roomVal))
+	let snapshot = await get(roomRef) // Get the current room value
+
+	if (!snapshot.exists()) {
+		// If room doesn't exist, create a new one
+		let roomVal = {
+			id: roomId,
+			category: utilService.getRndCategory(),
+			players: [userId],
+			guests: userId === GUEST_ID ? 1 : 0,
+			votes: {},
+			posts: [],
+			status: 'pending',
 		}
+
+		set(roomRef, roomVal).then(() => {
+			dispatch(setRoom(roomVal))
+		})
+	} else {
+		// If room exists, add the user if not already in the room
+		let roomVal = snapshot.val()
+
+		const isUserInRoom = roomVal.players.includes(userId)
+		const isGuest = userId === GUEST_ID
+		if (!isUserInRoom || isGuest) {
+			if (!isUserInRoom) roomVal.players.push(userId)
+			if (isGuest) roomVal.guests += 1
+			await set(roomRef, roomVal)
+		}
+
+		dispatch(setRoom(roomVal))
+	}
+
+	const unsubscribe = onValue(roomRef, (snapshot) => {
+		dispatch(setRoom(snapshot.val()))
 	})
 
 	return unsubscribe
 }
+
+// async function createRoom(roomId, dispatch, userId) {
+// 	const roomRef = ref(realtimeDb, `${ROOM_COLLECTION_KEY}/${roomId}`)
+
+// 	const unsubscribe = onValue(roomRef, async (snapshot) => {
+// 		let roomVal
+// 		if (!snapshot.exists()) {
+// 			roomVal = {
+// 				id: roomId,
+// 				category: utilService.getRndCategory(),
+// 				players: [userId],
+// 				guests: userId === GUEST_ID ? 1 : 0,
+// 				votes: {},
+// 				posts: [],
+// 				status: 'pending',
+// 			}
+// 			set(roomRef, roomVal).then(() => {
+// 				dispatch(setRoom(roomVal))
+// 			})
+// 		} else {
+// 			roomVal = snapshot.val()
+// 			if (!roomVal.players.includes(userId)) roomVal.players.push(userId)
+// 			if (userId === GUEST_ID) roomVal.guests += 1
+// 			dispatch(setRoom(roomVal))
+// 		}
+// 	})
+
+// 	return unsubscribe
+// }
+
 // Invite a user to the room
 async function joinRoom(roomId, user) {
 	const roomRef = ref(realtimeDb, `${ROOM_COLLECTION_KEY}/${roomId}`)

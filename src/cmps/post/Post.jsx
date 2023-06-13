@@ -10,13 +10,15 @@ import { useSelector } from 'react-redux'
 
 const COMMENTS_TO_SHOW = 3
 
-export default function Post({ content }) { //TODO: add post details
+export default function Post({ content }) {
+	//TODO: add post details
 	const commentInput = useRef(null)
 	const handleFocus = () => commentInput.current.focus()
 	const { username, caption, userPostUrl, docId, likes, createdAt, comments, imgSrc, userLikedPost } =
 		content
-	const [commentsSlice, setCommentsSlice] = useState(comments.slice(0, COMMENTS_TO_SHOW-1))
+	const [commentsSlice, setCommentsSlice] = useState(comments.slice(0, COMMENTS_TO_SHOW - 1))
 	const loggedInUser = useSelector((storeState) => storeState.userModule.loggedInUser)
+
 	function addAComment(comment) {
 		const userId = loggedInUser?.userId
 		if (!userId) return
@@ -29,6 +31,9 @@ export default function Post({ content }) { //TODO: add post details
 		setCommentsSlice([...commentsSlice, commentObj])
 		postService.addComment(commentObj, docId, userId)
 	}
+
+	const hasUserCommented = comments.some((comment) => comment.userId === loggedInUser?.userId)
+
 	return (
 		<div className="mb-5 border bg-white border-gray-primary">
 			<Header username={username} postUrl={userPostUrl} />
@@ -57,7 +62,11 @@ export default function Post({ content }) { //TODO: add post details
 			<p className="text-gray-base uppercase text-xs mt-2 ml-4">
 				{formatDistance(createdAt, new Date())} ago
 			</p>
-			<AddComment addComment={addAComment} commentInput={commentInput} />
+			<AddComment
+				addComment={addAComment}
+				commentInput={commentInput}
+				hasUserCommented={hasUserCommented}
+			/>
 		</div>
 	)
 }

@@ -86,9 +86,16 @@ async function toggleLiked(docId, userId, liked) {
 	}
 }
 
-async function addComment(commentObj, docId) {
+async function addComment(commentObj, docId, userId) {
 	try {
 		const postDoc = doc(db, POST_COLLECTION_KEY, docId)
+		const postData = (await getDoc(postDoc)).data()
+
+		const hasCommented = postData.comments.some((comment) => comment.userId === userId)
+		if (hasCommented) {
+			throw new Error('User has already commented on this post.')
+		}
+
 		await updateDoc(postDoc, {
 			comments: arrayUnion(commentObj),
 		})

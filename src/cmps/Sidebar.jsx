@@ -9,13 +9,13 @@ export default function Sidebar() {
 	if (loggedInUser) {
 		;({ username, fullname, userId, avatarUrl, following } = loggedInUser)
 	}
-	
+
 	// const { fullname, username, userId } = user
 	const links = [
 		{ to: HOME, text: 'Home', svg: 'home' },
 		{ to: PIC_CLASH, text: 'Pic Clash', svg: 'questionMark' },
 		{ to: CREATE, text: 'Create', svg: 'plus' },
-		{ to: `/p/${username}`, text: 'Profile', svg: null, profile: true },
+		{ to: `/p/${username || 'Guest'}`, text: 'Profile', svg: null, profile: true },
 	]
 	return (
 		<div className="mr-10 pt-0.5 pb-0.5 pl-1 pr-1 h-screen flex flex-col gap-8 items-start select-none border-r border-gray-300 bg-white w-[244px]">

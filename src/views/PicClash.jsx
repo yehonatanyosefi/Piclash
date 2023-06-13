@@ -1,5 +1,5 @@
 import MainWrapper from "../cmps/MainWrapper";
-import Room from "../cmps/Room";
+import Room from "../cmps/room/Room";
 
 
 export default function PicClash() {
