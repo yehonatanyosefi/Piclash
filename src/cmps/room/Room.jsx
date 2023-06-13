@@ -23,6 +23,7 @@ export default function Room() {
 	const room = useSelector((storeState) => storeState.roomModule.room)
 	const unsubscribe = useSelector((storeState) => storeState.roomModule.unsubscribe)
 	const dispatch = useDispatch()
+
 	const [prompt, setPrompt] = useState('')
 	const [imgUrl, setImgUrl] = useState('')
 	const [nickname, setNickname] = useState('')
@@ -30,6 +31,7 @@ export default function Room() {
 	const [inputRoomId, setInputRoomId] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState(null)
+
 	const roomHasGuests = room?.players?.includes(GUEST_ID)
 	const isUserGuest = loggedInUser?.userId === GUEST_ID
 	const roomVotes = room?.votes || []
@@ -71,10 +73,10 @@ export default function Room() {
 			await runTransaction(roomRef, (roomData) => {
 				if (roomData) {
 					roomData = { ...roomData, ...contentToUpdate }
-					if (contentToUpdate.posts) {
-						roomData.posts = roomData.posts || []
-						roomData.posts.push(contentToUpdate.posts[contentToUpdate.posts.length - 1])
-					}
+					// if (contentToUpdate.posts) {
+					// 	roomData.posts = roomData?.posts || []
+					// 	roomData.posts.push(contentToUpdate.posts[contentToUpdate.posts.length - 1])
+					// }
 				}
 				return roomData
 			})
