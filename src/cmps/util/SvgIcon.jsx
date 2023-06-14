@@ -6,7 +6,7 @@ const SvgMarkup = ({ markup, ...rest }) => {
 }
 
 export default function SvgIcon({ iconName, ...rest }) {
-	const { className } = rest
+	const { className, size } = rest
 	const [svgMarkup, setSvgMarkup] = useState(null)
 
 	useEffect(() => {

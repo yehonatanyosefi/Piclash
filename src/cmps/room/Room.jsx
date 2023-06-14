@@ -6,6 +6,7 @@ import { utilService } from '../../services/util.service'
 import { createRoom } from '../../store/actions/room.actions'
 import { GUEST_ID, ROOM_COLLECTION_KEY } from '../../services/room.service'
 import { ref, runTransaction } from 'firebase/database'
+import { realtimeDb } from '../../lib/firebase'
 
 import { CreateImageForm } from './CreateImageForm'
 import { CreateRoom } from './CreateRoom'
@@ -124,7 +125,7 @@ export default function Room() {
 	}
 
 	return (
-		<div className="bg-gray-background flex flex-col items-center justify-center px-4 py-8 min-h-screen">
+		<div className="bg-gray-background flex flex-col items-center justify-center px-4 py-8">
 			{loading && <div className="bg-gray-200 p-2 rounded-lg text-center">Loading...</div>}
 			{error && <div className="bg-red-200 p-2 rounded-lg text-center">{JSON.stringify(error)}</div>}
 			{roomId && (

@@ -9,22 +9,24 @@ function User({ username, fullname, userId, avatarUrl }) {
 
 	return (
 		<>
-			<Link to={`/p/${username}`} className="grid grid-cols-4 gap-4 mb-6 items-center">
-				<div className="flex items-center justify-between col-span-1">
-					<img
-						className="rounded-full w-16 flex mr-3"
-						src={avatarUrl || '/img/avatars/default.png'}
-						alt="Profile picture"
-					/>
-				</div>
-				<div className="col-span-3">
-					<p className="font-bold text-sm">{username}</p>
-					<p className="text-sm">{fullname}</p>
-				</div>
-			</Link>
-			<Link to={LOGIN} className="color-blue-primary">
-				switch
-			</Link>
+			<div className="flex items-center justify-between mb-6">
+				<Link to={`/p/${username}`} className="flex items-center">
+					<div className="flex items-center mr-3">
+						<img
+							className="rounded-full w-16"
+							src={avatarUrl || '/img/avatars/default.png'}
+							alt="Profile picture"
+						/>
+					</div>
+					<div className="ml-3">
+						<p className="font-bold text-sm">{username}</p>
+						<p className="text-sm">{fullname}</p>
+					</div>
+				</Link>
+				<Link to={LOGIN} className="text-blue-medium text-sm mr-3 font-bold ml-10">
+					switch
+				</Link>
+			</div>
 		</>
 	)
 }

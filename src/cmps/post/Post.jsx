@@ -35,7 +35,7 @@ export default function Post({ content }) {
 	const hasUserCommented = comments.some((comment) => comment.userId === loggedInUser?.userId)
 
 	return (
-		<div className="mb-5 border bg-white border-gray-primary">
+		<div className="mb-5 border bg-white border-gray-primary rounded-lg">
 			<Header username={username} postUrl={userPostUrl} />
 			<img src={imgSrc} alt={caption} className="min-w-full" />
 			<Actions

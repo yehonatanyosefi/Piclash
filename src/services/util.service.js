@@ -4,6 +4,7 @@ export const utilService = {
 	loadFromStorage,
 	removeFromStorage,
 	getRndCategory,
+	makeRoomId,
 }
 
 export function makeId(length = 5) {
@@ -11,6 +12,16 @@ export function makeId(length = 5) {
 	var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 	for (var i = 0; i < length; i++) {
 		text += possible.charAt(Math.floor(Math.random() * possible.length))
+	}
+	return text
+}
+
+function makeRoomId(length = 6) {
+	var text = ''
+	var possible = '0123456789'
+	for (var i = 0; i < length; i++) {
+		if (i === 0) text += possible.charAt(Math.floor(Math.random() * 9) + 1)
+		else text += possible.charAt(Math.floor(Math.random() * possible.length))
 	}
 	return text
 }
