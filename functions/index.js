@@ -62,7 +62,7 @@ exports.makeWithDallE = functions.https.onCall(async (data, context) => {
 		return { imgUrl }
 	} catch (err) {
 		console.error(`Error making with Dall E: ${err}`)
-		throw new functions.https.HttpsError(`An error occurred while creating image with DallE ${err}`)
+		throw new functions.https.HttpsError('internal', 'An error occurred while creating image with DallE')
 	}
 })
 

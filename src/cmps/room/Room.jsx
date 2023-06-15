@@ -92,7 +92,10 @@ export default function Room() {
 		setError(null)
 		setLoading(true)
 		try {
+			console.log('before')
 			const imgUrl = await aiService.createPostWithAiImg(prompt, room.category, loggedInUser, nickname)
+			console.log('after')
+			console.log(`imgUrl:`, imgUrl)
 			if (imgUrl) {
 				const posts = room.posts || []
 				posts.push({ prompt, imgUrl, nickname })
@@ -103,6 +106,7 @@ export default function Room() {
 				setError('AI service failed to return an image URL.')
 			}
 		} catch (err) {
+			console.log(`err:`, err)
 			if (err.response) {
 				setError(err.response.data)
 			} else {
