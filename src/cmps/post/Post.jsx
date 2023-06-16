@@ -4,18 +4,29 @@ import Header from './Header'
 import Actions from './Actions'
 import CommentList from './CommentList'
 import AddComment from './AddComment'
+import SvgIcon from '../util/SvgIcon'
 import { formatDistance } from 'date-fns'
 import { postService } from '../../services/post.service'
 import { useSelector } from 'react-redux'
 
 const COMMENTS_TO_SHOW = 3
 
-export default function Post({ content }) {
+export default function Post({ post }) {
 	//TODO: add post details
 	const commentInput = useRef(null)
 	const handleFocus = () => commentInput.current.focus()
-	const { username, caption, userPostUrl, docId, likes, createdAt, comments, imgSrc, userLikedPost } =
-		content
+	const {
+		username,
+		caption,
+		userPostUrl,
+		docId,
+		likes,
+		createdAt,
+		comments,
+		imgSrc,
+		userLikedPost,
+		votes,
+	} = post
 	const [commentsSlice, setCommentsSlice] = useState(comments.slice(0, COMMENTS_TO_SHOW - 1))
 	const loggedInUser = useSelector((storeState) => storeState.userModule.loggedInUser)
 
@@ -43,6 +54,7 @@ export default function Post({ content }) {
 				totalLikes={likes.length}
 				likedPost={userLikedPost}
 				handleFocus={handleFocus}
+				votes={votes.length}
 			/>
 			{/* <div className="p-4 pt-2 pb-0">
 				<p className="font-bold mb-1">{username}</p>

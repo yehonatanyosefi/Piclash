@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { aiService } from '../../services/ai.service'
+import { GUEST_ID, ROOM_COLLECTION_KEY } from '../../services/room.service'
+import { postService } from '../../services/post.service'
 import { utilService } from '../../services/util.service'
 import { createRoom } from '../../store/actions/room.actions'
-import { GUEST_ID, ROOM_COLLECTION_KEY } from '../../services/room.service'
 import { ref, runTransaction } from 'firebase/database'
 import { realtimeDb } from '../../lib/firebase'
 
@@ -71,7 +72,7 @@ export default function Room() {
 		const userInfo = { userId: loggedInUser.userId, nickname }
 		const voteInfo = { ...userInfo, postId }
 		await updateRoom({ votes: [...roomVotes, voteInfo] })
-		await updatePostVotes(postId, userInfo)
+		await postService.updatePostVotes(postId, userInfo)
 	}
 
 	async function updateRoom(contentToUpdate) {

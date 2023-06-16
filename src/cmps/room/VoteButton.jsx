@@ -22,7 +22,7 @@ const VotedPostsGallery = ({ posts, votes }) => (
 						className="w-full h-auto rounded-lg"
 					/>
 					<div className="flex items-center">
-						<SvgIcon iconName="like" />
+						<SvgIcon iconName="starFilled" />
 						<span className="ml-2">{votes?.filter((vote) => vote.postId === post.id)?.length || 0}</span>
 					</div>
 				</div>

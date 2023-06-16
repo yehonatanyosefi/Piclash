@@ -12,7 +12,7 @@ export default function Timeline() {
 			{!posts ? (
 				<Skeleton count={SKELETON_COUNT} width={576} height={700} className="mb-5" />
 			) : posts?.length > 0 ? (
-				posts.map((content) => <Post key={content.docId} content={content} />)
+				posts.map((post) => <Post key={post.docId} post={post} />)
 			) : (
 				<p className="text-center text-2xl">Follow people to see posts!</p>
 			)}
