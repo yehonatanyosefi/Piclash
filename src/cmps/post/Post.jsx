@@ -26,6 +26,7 @@ export default function Post({ post }) {
 		imgSrc,
 		userLikedPost,
 		votes,
+		isAi = false,
 	} = post
 	const [commentsSlice, setCommentsSlice] = useState(comments.slice(0, COMMENTS_TO_SHOW - 1))
 	const loggedInUser = useSelector((storeState) => storeState.userModule.loggedInUser)
@@ -55,6 +56,7 @@ export default function Post({ post }) {
 				likedPost={userLikedPost}
 				handleFocus={handleFocus}
 				votes={votes.length}
+				isAi={isAi}
 			/>
 			{/* <div className="p-4 pt-2 pb-0">
 				<p className="font-bold mb-1">{username}</p>

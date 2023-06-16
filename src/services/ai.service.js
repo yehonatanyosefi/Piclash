@@ -25,7 +25,7 @@ async function createPostWithAiImg(prompt, category, loggedInUser, nickname = ''
 		const refinedPrompt = `${prompt}, ${category}`
 		const imgUrl = await genImg(refinedPrompt)
 		const postDetails = `AI, ${userNick}With the prompt: "${prompt}". Category: ${category}.`
-		const postId = await postService.createPost(loggedInUser, postDetails, imgUrl)
+		const postId = await postService.createPost(loggedInUser, postDetails, imgUrl, true)
 		return { imgUrl, postId }
 	} catch (err) {
 		console.error(`Error creating post with Dall E: ${err}`)

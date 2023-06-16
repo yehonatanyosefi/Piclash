@@ -107,7 +107,7 @@ async function addComment(commentObj, docId, userId) {
 	}
 }
 
-async function createPost(user, caption, imgSrc) {
+async function createPost(user, caption, imgSrc, isAi = false) {
 	try {
 		const postDoc = await addDoc(collection(db, POST_COLLECTION_KEY), {
 			caption,
@@ -118,6 +118,7 @@ async function createPost(user, caption, imgSrc) {
 			likes: [],
 			comments: [],
 			votes: [],
+			isAi,
 		})
 		return postDoc.id
 	} catch (err) {

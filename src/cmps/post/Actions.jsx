@@ -4,7 +4,7 @@ import { postService } from '../../services/post.service'
 import { useSelector } from 'react-redux'
 import SvgIcon from '../util/SvgIcon'
 
-export default function PostActions({ docId, totalLikes, likedPost, handleFocus, votes }) {
+export default function PostActions({ docId, totalLikes, likedPost, handleFocus, votes, isAi }) {
 	const { userId = '' } = useSelector((storeState) => storeState.userModule.loggedInUser)
 
 	const [likeToggle, setLikeToggle] = useState(likedPost)
@@ -48,10 +48,12 @@ export default function PostActions({ docId, totalLikes, likedPost, handleFocus,
 				/>
 			</div>
 			<div className="p-4 py-0 flex">
-				<div className="w-8 select-none flex font-bold mr-2">
-					<p>{votes || 0}</p>
-					<SvgIcon iconName={votes ? 'starFilled' : 'starEmpty'} />
-				</div>
+				{isAi && (
+					<div className="w-8 select-none flex font-bold mr-2">
+						<p>{votes || 0}</p>
+						<SvgIcon iconName={votes ? 'starFilled' : 'starEmpty'} />
+					</div>
+				)}
 				<p className="font-bold">
 					{likes}
 					{` `}like{likes !== 1 ? `s` : ``}
