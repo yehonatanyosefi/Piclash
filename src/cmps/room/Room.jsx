@@ -23,7 +23,6 @@ const MIN_PEOPLE_TO_START = 3
 export default function Room() {
 	const loggedInUser = useSelector((storeState) => storeState.userModule.loggedInUser)
 	const room = useSelector((storeState) => storeState.roomModule.room)
-	console.log(`room:`, room)
 	const unsubscribe = useSelector((storeState) => storeState.roomModule.unsubscribe)
 	const dispatch = useDispatch()
 
@@ -114,7 +113,7 @@ export default function Room() {
 			)
 			if (imgUrl) {
 				const posts = room.posts || []
-				posts.push({ prompt, imgUrl, userId: loggedInUser?.userId, uppercaseNick, id: postId })
+				posts.push({ prompt, imgUrl, userId: loggedInUser?.userId, nickname: uppercaseNick, id: postId })
 				await updateRoom({ posts })
 				setPrompt('')
 				setImgUrl(imgUrl)

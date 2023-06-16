@@ -32,7 +32,7 @@ export default function Sidebar() {
 					isOpen ? 'block' : 'hidden'
 				} md:block md:w-[244px] md:h-screen md:border-r md:mr-10 md:pt-0.5 md:pb-0.5 md:pl-1 md:pr-1 md:flex md:flex-col md:gap-4 md:items-start md:border-gray-300 md:bg-white`}>
 				<Link to={HOME}>
-					<img className="m-3 m-w-full" src={`${process.env.PUBLIC_URL}/img/logo.png`} />
+					<img className="mt-3 mb-3 mr-1 m-w-full" src={`${process.env.PUBLIC_URL}/img/logo.png`} />
 				</Link>
 				{links.map(({ to, text, svg, profile }) => (
 					<Link

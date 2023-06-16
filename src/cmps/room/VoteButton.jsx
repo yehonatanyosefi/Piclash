@@ -35,7 +35,7 @@ function canVote(loggedInUser, post, nickname, GUEST_ID) {
 	if (loggedInUser.userId === GUEST_ID) {
 		return post.nickname !== nickname
 	} else {
-		return loggedInUser.userId !== post.userId
+		return post.userId !== loggedInUser.userId
 	}
 }
 
