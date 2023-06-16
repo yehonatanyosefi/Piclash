@@ -22,6 +22,7 @@ const MIN_PEOPLE_TO_START = 3
 export default function Room() {
 	const loggedInUser = useSelector((storeState) => storeState.userModule.loggedInUser)
 	const room = useSelector((storeState) => storeState.roomModule.room)
+	console.log(`room:`, room)
 	const unsubscribe = useSelector((storeState) => storeState.roomModule.unsubscribe)
 	const dispatch = useDispatch()
 
@@ -41,12 +42,15 @@ export default function Room() {
 		hasVoted = isUserGuest
 			? roomVotes.some((vote) => vote?.nickname === nickname)
 			: roomVotes.some((vote) => vote.userId === loggedInUser.userId)
-	const numberOfPlayers = (roomHasGuests ? -1 : 0) + room?.players?.length + room?.guests || 1
+	const numberOfPlayers = room?.guests || 1 //TODO fix
+	// const numberOfPlayers = room?.players?.length || 1
 
 	useEffect(() => {
 		const userId = loggedInUser?.userId
 		if (!userId || !roomId) return
-		dispatch(createRoom(roomId, userId))
+		if (room?.id && !roomId) setRoomId(room.id)
+		// if (isUserGuest && !nickname) return
+		dispatch(createRoom(roomId, userId, nickname))
 		return () => {
 			if (unsubscribe) unsubscribe()
 		}
@@ -62,9 +66,12 @@ export default function Room() {
 		}
 	}
 
-	function handleVote(imageId) {
-		if (hasVoted || !loggedInUser || !imgUrl) return
-		dispatch(voteForImage(imageId, roomId))
+	async function handleVote(postId) {
+		if (hasVoted || !loggedInUser) return
+		const userInfo = { userId: loggedInUser.userId, nickname }
+		const voteInfo = { ...userInfo, postId }
+		await updateRoom({ votes: [...roomVotes, voteInfo] })
+		await updatePostVotes(postId, userInfo)
 	}
 
 	async function updateRoom(contentToUpdate) {
@@ -74,10 +81,6 @@ export default function Room() {
 			await runTransaction(roomRef, (roomData) => {
 				if (roomData) {
 					roomData = { ...roomData, ...contentToUpdate }
-					// if (contentToUpdate.posts) {
-					// 	roomData.posts = roomData?.posts || []
-					// 	roomData.posts.push(contentToUpdate.posts[contentToUpdate.posts.length - 1])
-					// }
 				}
 				return roomData
 			})
@@ -89,16 +92,28 @@ export default function Room() {
 	async function createImgWithAi(ev) {
 		ev.preventDefault()
 		if (!loggedInUser) return
+
+		const uppercaseNick = capitalizeFirstLetterOfEachWord(nickname)
+		if (
+			room.players.some(
+				(player) =>
+					player.userId === loggedInUser.userId && isUserGuest && uppercaseNick === player.nickname
+			)
+		)
+			return setError('Nickname already exists')
+		if (uppercaseNick.length >= 20) return setError('Nickname must be less than 20 characters')
 		setError(null)
 		setLoading(true)
 		try {
-			console.log('before')
-			const imgUrl = await aiService.createPostWithAiImg(prompt, room.category, loggedInUser, nickname)
-			console.log('after')
-			console.log(`imgUrl:`, imgUrl)
+			const { imgUrl, postId } = await aiService.createPostWithAiImg(
+				prompt,
+				room.category,
+				loggedInUser,
+				uppercaseNick
+			)
 			if (imgUrl) {
 				const posts = room.posts || []
-				posts.push({ prompt, imgUrl, nickname })
+				posts.push({ prompt, imgUrl, userId: loggedInUser?.userId, uppercaseNick, id: postId })
 				await updateRoom({ posts })
 				setPrompt('')
 				setImgUrl(imgUrl)
@@ -128,6 +143,12 @@ export default function Room() {
 		setNickname(value)
 	}
 
+	function capitalizeFirstLetterOfEachWord(str) {
+		return str.replace(/\b\w/g, function (letter) {
+			return letter.toUpperCase()
+		})
+	}
+
 	return (
 		<div className="bg-gray-background flex flex-col items-center justify-center px-4 py-8">
 			{loading && <div className="bg-gray-200 p-2 rounded-lg text-center">Loading...</div>}
@@ -141,7 +162,7 @@ export default function Room() {
 						startGameRoom={startGameRoom}
 						MIN_PEOPLE_TO_START={MIN_PEOPLE_TO_START}
 					/>
-					{room?.status === 'started' && (
+					{room?.status === 'started' && !imgUrl && !loading && (
 						<CreateImageForm
 							createImgWithAi={createImgWithAi}
 							nickname={nickname}
@@ -153,6 +174,9 @@ export default function Room() {
 						/>
 					)}
 					<VoteButton
+						loggedInUser={loggedInUser}
+						GUEST_ID={GUEST_ID}
+						nickname={nickname}
 						hasVoted={hasVoted}
 						handleVote={handleVote}
 						room={room}

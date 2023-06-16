@@ -8,7 +8,7 @@ const API_KEY = 'ai/'
 
 // const makeWithDallE = httpsCallable(functions, 'makeWithDallE')
 // const makeWithStableDiffusion = httpsCallable(functions, 'makeWithStableDiffusion')
-async function postImg(prompt) {
+async function genImg(prompt) {
 	try {
 		const imgUrl = await httpService.post(API_KEY + 'genImg', { prompt })
 		return imgUrl
@@ -23,12 +23,10 @@ async function createPostWithAiImg(prompt, category, loggedInUser, nickname = ''
 	const userNick = username === 'Guest' ? `Made by: ${nickname}, ` : ''
 	try {
 		const refinedPrompt = `${prompt}, ${category}`
-		const imgUrl = await postImg(refinedPrompt)
-		const postDetails = `AI, ${userNick}With the prompt: "${prompt}". Category: ${category}.${
-			nickname ? ` Made by: ${nickname}` : ''
-		}`
-		await postService.createPost(loggedInUser, postDetails, imgUrl)
-		return imgUrl
+		const imgUrl = await genImg(refinedPrompt)
+		const postDetails = `AI, ${userNick}With the prompt: "${prompt}". Category: ${category}.`
+		const postId = await postService.createPost(loggedInUser, postDetails, imgUrl)
+		return { imgUrl, postId }
 	} catch (err) {
 		console.error(`Error creating post with Dall E: ${err}`)
 		throw err

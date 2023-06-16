@@ -14,10 +14,10 @@ export function setRoom(room) {
 		}
 	}
 }
-export function createRoom(roomId, userId) {
+export function createRoom(roomId, userId, nickname = '') {
 	return async (dispatch, getState) => {
 		try {
-			const unsubscribe = await roomService.createRoom(roomId, dispatch, userId)
+			const unsubscribe = await roomService.createRoom(roomId, dispatch, userId, nickname)
 			const action = {
 				type: SET_UNSUBSCRIBE,
 				unsubscribe,

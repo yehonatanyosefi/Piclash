@@ -12,7 +12,7 @@ export const roomService = {
 	startGame,
 }
 
-async function createRoom(roomId, dispatch, userId) {
+async function createRoom(roomId, dispatch, userId, nickname = '') {
 	const roomRef = ref(realtimeDb, `${ROOM_COLLECTION_KEY}/${roomId}`)
 
 	let snapshot = await get(roomRef) // Get the current room value
@@ -22,7 +22,7 @@ async function createRoom(roomId, dispatch, userId) {
 		let roomVal = {
 			id: roomId,
 			category: utilService.getRndCategory(),
-			players: [userId],
+			players: [{ userId, nickname }],
 			guests: userId === GUEST_ID ? 1 : 0,
 			votes: {},
 			posts: [],
@@ -35,6 +35,13 @@ async function createRoom(roomId, dispatch, userId) {
 	} else {
 		// If room exists, add the user if not already in the room
 		let roomVal = snapshot.val()
+		// roomVal.id = roomId
+		// roomVal.category = utilService.getRndCategory(),
+		// 	roomVal.players= [{ userId, nickname }],
+		// 	roomVal.guests: userId === GUEST_ID ? 1 : 0,
+		// 	roomVal.votes: {},
+		// 	roomVal.posts: [],
+		// 	roomVal.status: 'pending',
 
 		const isUserInRoom = roomVal.players.includes(userId)
 		const isGuest = userId === GUEST_ID

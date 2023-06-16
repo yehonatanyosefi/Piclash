@@ -12,6 +12,7 @@ import {
 	orderBy,
 	arrayUnion,
 	arrayRemove,
+	serverTimestamp,
 } from 'firebase/firestore'
 import { userService } from './user.service'
 
@@ -25,6 +26,7 @@ export const postService = {
 	toggleLiked,
 	createPost,
 	addComment,
+	updatePostVotes,
 }
 
 async function getPostsByUserId(userId) {
@@ -115,10 +117,25 @@ async function createPost(user, caption, imgSrc) {
 			createdAt: Date.now(),
 			likes: [],
 			comments: [],
+			votes: [],
 		})
 		return postDoc.id
 	} catch (err) {
 		console.log(`Error in creating post:`, err)
+		throw err
+	}
+}
+
+async function updatePostVotes(postId, userInfo) {
+	try {
+		const postRef = doc(db, POST_COLLECTION_KEY, postId)
+		await updateDoc(postRef, {
+			votes: arrayUnion(userInfo),
+		})
+
+		console.log(`Votes updated successfully for post: ${postId}`)
+	} catch (err) {
+		console.log(`Error in updating votes for post:`, err)
 		throw err
 	}
 }
